@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-User Inventory Tracking System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .user-login {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .user-login input {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1400px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .status-low {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .status-critical {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .status-good {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        
+        .order-qty {
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .last-updated {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        
+        .summary {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .activity-log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .activity-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .auto-save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: none;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                margin: 5px 0;
+            }
+            
+            .summary {
+                flex-direction: column;
+            }
+            
+            .summary-item {
+                margin-bottom: 10px;
+            }
+            
+            .user-info {
+                position: static;
+                margin-top: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        ✓ Changes saved automatically
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Multi-User Inventory System</h1>
+            <p>Collaborative Medical Equipment Tracking</p>
+            <div class="user-info" id="userInfo" style="display: none;">
+                Welcome, <span id="currentUser"></span>
+                <button class="btn btn-sm" onclick="logout()" style="margin-left: 10px; padding: 5px 10px;">Logout</button>
+            </div>
+        </div>
+        
+        <div class="user-login" id="loginSection">
+            <h3>👤 User Login</h3>
+            <input type="text" id="usernameInput" placeholder="Enter your name" style="margin-right: 10px;">
+            <button class="btn" onclick="login()">Login</button>
+            <p style="margin-top: 15px; color: #6c757d; font-size: 0.9em;">
+                Enter your name to start tracking inventory changes
+            </p>
+        </div>
+        
+        <div id="mainContent" style="display: none;">
+            <div class="controls">
+                <button class="btn" onclick="addNewItem()">+ Add New Item</button>
+                <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+                <button class="btn btn-info" onclick="exportToCSV()">Export to CSV</button>
+                <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import CSV</button>
+                <input type="file" id="importFile" class="file-input" accept=".csv" onchange="importFromCSV(event)">
+                <button class="btn btn-info" onclick="exportSystemData()">Export System Data</button>
+                <button class="btn btn-warning" onclick="document.getElementById('importSystemFile').click()">Import System Data</button>
+                <input type="file" id="importSystemFile" class="file-input" accept=".json" onchange="importSystemData(event)">
+                <button class="btn btn-info" onclick="showActivityLog()">View Activity Log</button>
+                
+                <div style="margin-left: auto; font-size: 0.9em; color: #6c757d;">
+                    <span id="lastSaved">Last saved: Never</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Current Stock</th>
+                            <th>Par Level</th>
+                            <th>Reorder Point</th>
+                            <th>Max Stock</th>
+                            <th>Unit Cost</th>
+                            <th>Supplier</th>
+                            <th>Status</th>
+                            <th>Order Quantity</th>
+                            <th>Order Value</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="summary">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalItems">0</div>
+                    <div class="summary-label">Total Items</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="lowStockItems">0</div>
+                    <div class="summary-label">Low Stock Items</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="criticalItems">0</div>
+                    <div class="summary-label">Critical Items</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalOrderValue">$0</div>
+                    <div class="summary-label">Total Order Value</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="activeUsers">0</div>
+                    <div class="summary-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Activity Log Modal -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>📋 Activity Log</h2>
+            <div id="activityLog" class="activity-log"></div>
+        </div>
+    </div>
+
+    <script>
+        let inventory = [];
+        let activityLog = [];
+        let currentUser = null;
+        let nextId = 1;
+        let autoSaveTimer;
+        
+        // Note: GitHub Pages doesn't support localStorage, so using in-memory storage
+        let memoryStorage = {
+            inventory: [],
+            activityLog: [],
+            nextId: 1,
+            currentUser: null
+        };
+        
+        // Predefined categories
+        const categories = [
+            'Oxygen Supplies',
+            'Ambulatory Aids',
+            'DME Bent Metal',
+            'Wheelchairs',
+            'Bathroom Safety',
+            'Respiratory Other'
+        ];
+
+        // Initialize system
+        function init() {
+            loadSystemData();
+            if (currentUser) {
+                showMainContent();
+            }
+        }
+
+        // User Management
+        function login() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username) {
+                currentUser = username;
+                document.getElementById('currentUser').textContent = username;
+                logActivity(`${username} logged in`);
+                showMainContent();
+                saveSystemData();
+            }
+        }
+
+        function logout() {
+            if (currentUser) {
+                logActivity(`${currentUser} logged out`);
+                currentUser = null;
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('usernameInput').value = '';
+                saveSystemData();
+            }
+        }
+
+        function showMainContent() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'block';
+            updateTable();
+        }
+
+        // Data Management - Modified for GitHub Pages
+        function loadSystemData() {
+            try {
+                // In GitHub Pages, we'll use in-memory storage
+                inventory = memoryStorage.inventory || [];
+                activityLog = memoryStorage.activityLog || [];
+                nextId = memoryStorage.nextId || 1;
+                currentUser = memoryStorage.currentUser || null;
+                
+                if (currentUser) {
+                    document.getElementById('currentUser').textContent = currentUser;
+                }
+                
+                updateLastSaved();
+            } catch (e) {
+                console.error('Error loading system data:', e);
+            }
+        }
+
+        function saveSystemData() {
+            try {
+                // Save to memory storage
+                memoryStorage = {
+                    inventory: inventory,
+                    activityLog: activityLog,
+                    nextId: nextId,
+                    currentUser: currentUser,
+                    timestamp: new Date().toISOString()
+                };
+                
+                updateLastSaved();
+                showAutoSaveIndicator();
+            } catch (e) {
+                console.error('Error saving system data:', e);
+            }
+        }
+
+        function updateLastSaved() {
+            const now = new Date();
+            document.getElementById('lastSaved').textContent = 
+                `Last saved: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Auto-save functionality
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveSystemData();
+            }, 1000);
+        }
+
+        // Activity Logging
+        function logActivity(activity) {
+            const timestamp = new Date().toISOString();
+            activityLog.unshift({
+                timestamp: timestamp,
+                activity: activity,
+                user: currentUser || 'System'
+            });
+            
+            // Keep only last 100 activities
+            if (activityLog.length > 100) {
+                activityLog = activityLog.slice(0, 100);
+            }
+            
+            scheduleAutoSave();
+        }
+
+        function showActivityLog() {
+            const modal = document.getElementById('activityModal');
+            const logContainer = document.getElementById('activityLog');
+            
+            logContainer.innerHTML = '';
+            
+            activityLog.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'activity-item';
+                const date = new Date(entry.timestamp);
+                div.innerHTML = `
+                    <strong>${entry.user}</strong> - ${entry.activity}
+                    <div class="last-updated">
+                        ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+                    </div>
+                `;
+                logContainer.appendChild(div);
+            });
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('activityModal').style.display = 'none';
+        }
+
+        // Inventory Management
+        function addNewItem() {
+            const newItem = {
+                id: nextId++,
+                itemCode: '',
+                itemName: '',
+                category: categories[0],
+                currentStock: 0,
+                parLevel: 0,
+                reorderPoint: 0,
+                maxStock: 0,
+                unitCost: 0,
+                supplier: '',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: currentUser
+            };
+            inventory.push(newItem);
+            logActivity(`Added new item: ${newItem.itemName || 'Unnamed Item'}`);
+            updateTable();
+            scheduleAutoSave();
+        }
+
+        function deleteItem(id) {
+            const item = inventory.find(item => item.id === id);
+            if (item && confirm(`Are you sure you want to delete "${item.itemName}"?`)) {
+                inventory = inventory.filter(item => item.id !== id);
+                logActivity(`Deleted item: ${item.itemName}`);
+                updateTable();
+                scheduleAutoSave();
+            }
+        }
+
+        function updateItem(id, field, value) {
+            const item = inventory.find(item => item.id === id);
+            if (item) {
+                const oldValue = item[field];
+                
+                if (field === 'currentStock' || field === 'parLevel' || field === 'reorderPoint' || field === 'maxStock' || field === 'unitCost') {
+                    item[field] = parseFloat(value) || 0;
+                } else {
+                    item[field] = value;
+                }
+                
+                item.lastUpdated = new Date().toISOString();
+                item.lastUpdatedBy = currentUser;
+                
+                if (oldValue !== value) {
+                    logActivity(`Updated ${item.itemName || 'item'}: ${field} changed from "${oldValue}" to "${value}"`);
+                }
+                
+                updateTable();
+                scheduleAutoSave();
+            }
+        }
+
+        function calculateOrderQuantity(item) {
+            if (item.currentStock <= item.reorderPoint) {
+                return Math.max(0, item.parLevel - item.currentStock);
+            }
+            return 0;
+        }
+
+        function getStockStatus(item) {
+            if (item.currentStock <= item.reorderPoint) {
+                return item.currentStock <= (item.reorderPoint * 0.5) ? 'critical' : 'low';
+            }
+            return 'good';
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'critical': return '🔴 Critical';
+                case 'low': return '🟡 Low Stock';
+                case 'good': return '🟢 Good';
+                default: return '';
+            }
+        }
+
+        function createCategoryDropdown(selectedCategory = '', itemId) {
+            const options = categories.map(cat => 
+                `<option value="${cat}" ${cat === selectedCategory ? 'selected' : ''}>${cat}</option>`
+            ).join('');
+            return `<select onchange="updateItem(${itemId}, 'category', this.value)">${options}</select>`;
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '';
+
+            inventory.forEach(item => {
+                const orderQty = calculateOrderQuantity(item);
+                const status = getStockStatus(item);
+                const orderValue = orderQty * item.unitCost;
+                const lastUpdated = new Date(item.lastUpdated);
+
+                const row = document.createElement('tr');
+                row.className = `status-${status}`;
+                
+                row.innerHTML = `
+                    <td><input type="text" value="${item.itemCode}" onchange="updateItem(${item.id}, 'itemCode', this.value)"></td>
+                    <td><input type="text" value="${item.itemName}" onchange="updateItem(${item.id}, 'itemName', this.value)"></td>
+                    <td>${createCategoryDropdown(item.category, item.id)}</td>
+                    <td><input type="number" value="${item.currentStock}" onchange="updateItem(${item.id}, 'currentStock', this.value)"></td>
+                    <td><input type="number" value="${item.parLevel}" onchange="updateItem(${item.id}, 'parLevel', this.value)"></td>
+                    <td><input type="number" value="${item.reorderPoint}" onchange="updateItem(${item.id}, 'reorderPoint', this.value)"></td>
+                    <td><input type="number" value="${item.maxStock}" onchange="updateItem(${item.id}, 'maxStock', this.value)"></td>
+                    <td><input type="number" step="0.01" value="${item.unitCost}" onchange="updateItem(${item.id}, 'unitCost', this.value)"></td>
+                    <td><input type="text" value="${item.supplier}" onchange="updateItem(${item.id}, 'supplier', this.value)"></td>
+                    <td>${getStatusText(status)}</td>
+                    <td class="order-qty">${orderQty}</td>
+                    <td>$${orderValue.toFixed(2)}</td>
+                    <td class="last-updated">
+                        ${lastUpdated.toLocaleDateString()}<br>
+                        ${lastUpdated.toLocaleTimeString()}<br>
+                        by ${item.lastUpdatedBy || 'Unknown'}
+                    </td>
+                    <td><button class="btn btn-danger" onclick="deleteItem(${item.id})">Delete</button></td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const totalItems = inventory.length;
+            const lowStockItems = inventory.filter(item => getStockStatus(item) === 'low').length;
+            const criticalItems = inventory.filter(item => getStockStatus(item) === 'critical').length;
+            const totalOrderValue = inventory.reduce((sum, item) => {
+                return sum + (calculateOrderQuantity(item) * item.unitCost);
+            }, 0);
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('lowStockItems').textContent = lowStockItems;
+            document.getElementById('criticalItems').textContent = criticalItems;
+            document.getElementById('totalOrderValue').textContent = `$${totalOrderValue.toFixed(2)}`;
+            document.getElementById('activeUsers').textContent = currentUser ? '1' : '0';
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all inventory data? This action cannot be undone.')) {
+                inventory = [];
+                logActivity('Cleared all inventory data');
+                updateTable();
+                scheduleAutoSave();
+            }
+        }
+
+        // Import/Export Functions
+        function exportToCSV() {
+            const headers = ['Item Code', 'Item Name', 'Category', 'Current Stock', 'Par Level', 'Reorder Point', 'Max Stock', 'Unit Cost', 'Supplier', 'Status', 'Order Quantity', 'Order Value', 'Last Updated', 'Last Updated By'];
+            
+            const csvContent = [
+                headers.join(','),
+                ...inventory.map(item => {
+                    const orderQty = calculateOrderQuantity(item);
+                    const status = getStockStatus(item);
+                    const orderValue = orderQty * item.unitCost;
+                    const lastUpdated = new Date(item.lastUpdated);
+                    
+                    return [
+                        `"${item.itemCode}"`,
+                        `"${item.itemName}"`,
+                        `"${item.category}"`,
+                        item.currentStock,
+                        item.parLevel,
+                        item.reorderPoint,
+                        item.maxStock,
+                        item.unitCost,
+                        `"${item.supplier}"`,
+                        status,
+                        orderQty,
+                        orderValue.toFixed(2),
+                        lastUpdated.toLocaleDateString(),
+                        `"${item.lastUpdatedBy || 'Unknown'}"`
+                    ].join(',');
+                })
+            ].join('\n');
+
+            downloadFile(csvContent, 'inventory_report.csv', 'text/csv');
+            logActivity('Exported inventory to CSV');
+        }
+
+        function importFromCSV(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const csvData = e.target.result;
+                        const lines = csvData.split('\n');
+                        const headers = lines[0].split(',');
+                        
+                        let importedCount = 0;
+                        for (let i = 1; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (line) {
+                                const values = line.split(',');
+                                const newItem = {
+                                    id: nextId++,
+                                    itemCode: values[0]?.replace(/"/g, '') || '',
+                                    itemName: values[1]?.replace(/"/g, '') || '',
+                                    category: values[2]?.replace(/"/g, '') || categories[0],
+                                    currentStock: parseFloat(values[3]) || 0,
+                                    parLevel: parseFloat(values[4]) || 0,
+                                    reorderPoint: parseFloat(values[5]) || 0,
+                                    maxStock: parseFloat(values[6]) || 0,
+                                    unitCost: parseFloat(values[7]) || 0,
+                                    supplier: values[8]?.replace(/"/g, '') || '',
+                                    lastUpdated: new Date().toISOString(),
+                                    lastUpdatedBy: currentUser
+                                };
+                                inventory.push(newItem);
+                                importedCount++;
+                            }
+                        }
+                        
+                        logActivity(`Imported ${importedCount} items from CSV`);
+                        updateTable();
+                        scheduleAutoSave();
+                        alert(`Successfully imported ${importedCount} items`);
+                    } catch (error) {
+                        alert('Error importing CSV file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function exportSystemData() {
+            const data = {
+                inventory: inventory,
+                activityLog: activityLog,
+                nextId: nextId,
+                exportDate: new Date().toISOString(),
+                exportedBy: currentUser
+            };
+            
+            const jsonContent = JSON.stringify(data, null, 2);
+            downloadFile(jsonContent, 'inventory_system_backup.json', 'application/json');
+            logActivity('Exported complete system data');
+        }
+
+        function importSystemData(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (confirm('This will replace all current data. Are you sure?')) {
+                            inventory = data.inventory || [];
+                            activityLog = data.activityLog || [];
+                            nextId = data.nextId || 1;
+                            
+                            logActivity(`Imported system data from ${data.exportDate || 'unknown date'}`);
+                            updateTable();
+                            scheduleAutoSave();
+                            alert('System data imported successfully');
+                        }
+                    } catch (error) {
+                        alert('Error importing system data: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Initialize the application
+        window.onload = init;
+        
+        // Auto-save on page unload
+        window.addEventListener('beforeunload', function() {
+            saveSystemData();
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('activityModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
