@@ -428,6 +428,102 @@
             }
         }
 
+        function preloadInventoryItems() {
+    // Only preload if inventory is empty (first time setup)
+    if (inventory.length === 0) {
+        const defaultItems = [
+            {
+                id: nextId++,
+                itemCode: 'OXY-001',
+                itemName: 'Oxygen Concentrator',
+                category: 'Oxygen Supplies',
+                currentStock: 15,
+                parLevel: 25,
+                reorderPoint: 10,
+                maxStock: 50,
+                unitCost: 1200.00,
+                supplier: 'Medical Supply Co',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: 'System'
+            },
+            {
+                id: nextId++,
+                itemCode: 'WCH-001',
+                itemName: 'Standard Wheelchair',
+                category: 'Wheelchairs',
+                currentStock: 5,
+                parLevel: 15,
+                reorderPoint: 8,
+                maxStock: 30,
+                unitCost: 350.00,
+                supplier: 'Mobility Plus',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: 'System'
+            },
+            {
+                id: nextId++,
+                itemCode: 'WAL-001',
+                itemName: 'Standard Walker',
+                category: 'Ambulatory Aids',
+                currentStock: 3,
+                parLevel: 12,
+                reorderPoint: 6,
+                maxStock: 25,
+                unitCost: 85.00,
+                supplier: 'Mobility Plus',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: 'System'
+            },
+            {
+                id: nextId++,
+                itemCode: 'GRB-001',
+                itemName: 'Shower Grab Bar',
+                category: 'Bathroom Safety',
+                currentStock: 20,
+                parLevel: 30,
+                reorderPoint: 15,
+                maxStock: 60,
+                unitCost: 45.00,
+                supplier: 'Safety First Medical',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: 'System'
+            },
+            {
+                id: nextId++,
+                itemCode: 'NEB-001',
+                itemName: 'Nebulizer Machine',
+                category: 'Respiratory Other',
+                currentStock: 8,
+                parLevel: 15,
+                reorderPoint: 5,
+                maxStock: 25,
+                unitCost: 125.00,
+                supplier: 'Respiratory Care Inc',
+                lastUpdated: new Date().toISOString(),
+                lastUpdatedBy: 'System'
+            }
+        ];
+        
+        // Add all default items to inventory
+        inventory = [...defaultItems];
+        
+        // Log the preload activity
+        logActivity('System preloaded default inventory items');
+        
+        // Save the preloaded data
+        saveSystemData();
+    }
+}
+
+// Modified init function - add the preload call here
+function init() {
+    loadSystemData();
+    preloadInventoryItems(); // Add this line
+    if (currentUser) {
+        showMainContent();
+    }
+}
+
         // User Management
         function login() {
             const username = document.getElementById('usernameInput').value.trim();
